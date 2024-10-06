@@ -4,32 +4,67 @@ import DataTable from "./DataTable";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import Pagination from "@/components/Pagination";
+import { Status, Ticket } from "@prisma/client";
+import StatusFilter from "@/components/StatusFilter";
 
-interface SearchParams {
+export interface SearchParams {
+  status: Status;
   page: string;
+  orderBy : keyof Ticket;
 }
 
-const Tickets = async ({searchParams} :{searchParams : SearchParams}) => {
-  
-  const pageSize = 2;
+const Tickets = async ({ searchParams }: { searchParams: SearchParams }) => {
+
+  const pageSize = 4;
   const page = parseInt(searchParams.page) || 1;
-  const ticketCount = await prisma.ticket.count();
+  
+  const orderBy = searchParams.orderBy ? searchParams.orderBy : "createdAt";
+
+
+
+  const statuses = Object.values(Status);
+
+  const status = statuses.includes(searchParams.status)
+    ? searchParams.status
+    : undefined;
+
+  let where = {};
+
+  console.log("status", status);
+
+  if (status) {
+    where = { status }
+  } else {
+    where = {
+      NOT: [{ status: "CLOSED" as Status }]
+    }
+  }
+
+  const ticketCount = await prisma.ticket.count({ where });
   const tickets = await prisma.ticket.findMany({
-      take: pageSize,
-      skip: (page - 1) * pageSize,   
+    where,
+    orderBy: {
+      [orderBy]: "desc",
+    },  // orderBy: { createdAt: "asc" },
+    take: pageSize,
+    skip: (page - 1) * pageSize,
   });
 
   // console.log("hello world");
-  
+
   return (
     <div>
-      <Link
-        href="/tickets/new"
-        className={buttonVariants({ variant: "default" })}
-      >
-        New Ticket
-      </Link>
-      <DataTable tickets={tickets} />
+      <div className="flex gap-2">
+        <Link
+          href="/tickets/new"
+          className={buttonVariants({ variant: "default" })}
+        >
+          New Ticket (Add)
+        </Link>
+
+        <StatusFilter />
+      </div>
+      <DataTable tickets={tickets} searchParams={searchParams} />
       <Pagination itemCount={ticketCount} pageSize={pageSize} currentPage={page} />
     </div>
   );
