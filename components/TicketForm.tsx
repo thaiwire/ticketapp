@@ -9,25 +9,27 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
-import { Select, SelectContent, SelectItem,
-   SelectTrigger,SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Ticket } from "@prisma/client";
 
-
-
 type TicketFormData = z.infer<typeof ticketSchema>;
 
 interface Props {
-  ticket? : Ticket
+  ticket?: Ticket;
 }
 
-const TicketForm = ({ticket}: Props) => {
-
-  const [isSubmitting,setIsSubmitting] = useState(false);
-  const [error,setError] = useState("");
+const TicketForm = ({ ticket }: Props) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const form = useForm<TicketFormData>({
@@ -36,29 +38,30 @@ const TicketForm = ({ticket}: Props) => {
   async function onSubmit(values: z.infer<typeof ticketSchema>) {
     console.log(values);
     try {
-        setIsSubmitting(true)
-        setError("")
-        if (ticket) {
-           await axios.patch("/api/tickets/" + ticket.id,values);
-        } else {
-           await axios.post("/api/tickets",values);
-        }
-        setIsSubmitting(false)
-        router.push("/tickets");
-        router.refresh();
-
+      setIsSubmitting(true);
+      setError("");
+      if (ticket) {
+        await axios.patch("/api/tickets/" + ticket.id, values);
+      } else {
+        await axios.post("/api/tickets", values);
+      }
+      setIsSubmitting(false);
+      router.push("/tickets");
+      router.refresh();
     } catch (error) {
-       console.log(error);
-       setError("unknow Error")
-       setIsSubmitting(false)
+      console.log(error);
+      setError("unknow Error");
+      setIsSubmitting(false);
     }
   }
 
   return (
     <div className="rounded-md border w-full p-4">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 w-full">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 w-full"
+        >
           <FormField
             control={form.control}
             name="title"
@@ -88,22 +91,28 @@ const TicketForm = ({ticket}: Props) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Status..." defaultValue={ticket?.status}/>
+                        <SelectValue
+                          placeholder="Status..."
+                          defaultValue={ticket?.status}
+                        />
                       </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                           <SelectItem value="OPEN">OPEN</SelectItem>
-                           <SelectItem value="STARTED">STARTED</SelectItem>
-                           <SelectItem value="CLOSED">CLOSE</SelectItem>
-                      </SelectContent>
-                    
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="OPEN">OPEN</SelectItem>
+                      <SelectItem value="STARTED">STARTED</SelectItem>
+                      <SelectItem value="CLOSED">CLOSE</SelectItem>
+                    </SelectContent>
                   </Select>
                 </FormItem>
-              )} />
-          
+              )}
+            />
+
             <FormField
               control={form.control}
               name="priority"
@@ -111,27 +120,34 @@ const TicketForm = ({ticket}: Props) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>PRIORITY</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Priority..." defaultValue={ticket?.priority}/>
+                        <SelectValue
+                          placeholder="Priority..."
+                          defaultValue={ticket?.priority}
+                        />
                       </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                           <SelectItem value="LOW">LOW</SelectItem>
-                           <SelectItem value="MEDIUM">MEDIUM</SelectItem>
-                           <SelectItem value="HIGH">HIGH</SelectItem>
-                      </SelectContent>
-                    
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="LOW">LOW</SelectItem>
+                      <SelectItem value="MEDIUM">MEDIUM</SelectItem>
+                      <SelectItem value="HIGH">HIGH</SelectItem>
+                    </SelectContent>
                   </Select>
                 </FormItem>
-              )} />
+              )}
+            />
           </div>
           <Button type="submit" disabled={isSubmitting}>
             {ticket ? "Update Ticket" : "Create Ticket"}
           </Button>
         </form>
       </Form>
+      <div className="text-destructive">{error}</div>
     </div>
   );
 };

@@ -1,30 +1,30 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import React from 'react'
+import Link from "next/link";
+import React from "react";
 
-const MainNextLink = () => {
+const MainNextLink = ({ role }: { role?: string }) => {
   const links = [
-    {label : "Dashboard",href: "/"},
-    {label : "Tickets",href: "/tickets"},
-    {label : "Users",href: "/users"}
-  ]
+    { label: "Dashboard", href: "/", adminOnly: false },
+    { label: "Tickets", href: "/tickets", adminOnly: false },
+    { label: "Users", href: "/users", adminOnly: true },
+  ];
 
   return (
     <div className="flex items-center gap-2">
-
-        {links.map((link)=>(
-            <Link href={link.href} className="navbar-link" key={link.label}>
+      {links
+        .filter((link) => !link.adminOnly || role === "ADMIN")
+        .map((link) => (
+          <Link href={link.href} className="navbar-link" key={link.label}>
             {link.label}
-            </Link>
-
+          </Link>
         ))}
 
-        {/* <Link href="/" className='navbar-link'>DashBoard</Link>
+      {/* <Link href="/" className='navbar-link'>DashBoard</Link>
         <Link href="/tickets">Tickets</Link>
         <Link href="/users">Users</Link> */}
-      </div>
-  )
-}
+    </div>
+  );
+};
 
-export default MainNextLink
+export default MainNextLink;
